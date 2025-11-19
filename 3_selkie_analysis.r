@@ -16,26 +16,33 @@ library(tidyverse)
 dat <- read.csv("2_selkie_data.csv")
 
 ###############################################################################
-# model fitting
+# model fitting : CS-DHGLMM
+# Combination of Figure 4 c & d
 ###############################################################################
 
+# phenotypic model
 y_cs <- bf(
   aggr ~ temp + sex + (1 + temp | a | id),
   sigma ~ 1 + sex + (1 | a | id)
 )
+# oikotypic model
 h_cs <- bf(
   temp ~ 1 + (1 | a | id),
   sigma ~ 1 + (1 | a | id)
 )
 
+# running the combined model
 m_cs <- brm(y_cs + h_cs + set_rescor(FALSE),
   data = dat,
   chains = 4, cores = 4,
   iter = 4000, warmup = 2000, thin = 4
 )
 
+# saving the model
 saveRDS(m_cs, file = "m_cs.rds")
 
+
+# summary and parameter estimates table
 if (!exists("m_cs")) m_cs <- readRDS("m_cs.rds")
 
 summary(m_cs)
@@ -111,6 +118,7 @@ gt_table <- param_out %>%
     locations = cells_row_groups()
   )
 
+# Table 1
 print(gt_table)
 
 gtsave(gt_table, "param_summary_table.docx")

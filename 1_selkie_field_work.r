@@ -8,18 +8,24 @@
 library(mvtnorm)
 library(dplyr)
 
+# setting seed for reproducibility
 set.seed(19812012)
 
 ###############################################################################
 # simulated model
 ###############################################################################
 
+# Phenotypic trait: aggressivity
 # y = bm0 + um0 + (bmh + sm1) * h + bm1 * sex + e
 # sd(e) = exp(bv0 + uv0 + bv1 * sex)
 
+# sd(e) = exp(bv0 + uv0 + bv1 * sex)
+
+# Oikotypic trait: temperature
 # h = bm0 + um0 + e
 # sd(e) = exp(bv0 + uv0)
 
+###############################################################################
 
 # sample size
 n_ind <- 50
@@ -27,29 +33,42 @@ n_obs <- 10
 n_tot <- n_ind * n_obs
 
 # fixed effects parameters
-## trait
+## Phenotype
+# mean aggressiveness
 y_bm0 <- 0
+# effect of temperature on aggressiveness
 y_bmh <- 1
+# mean variance in aggressiveness (log scale)
 y_bv0 <- 0
+# effect of sex on aggressiveness
 y_bm1 <- 0.5
+# effect of sex on variance in aggressiveness (log scale)
 y_bv1 <- 0.5
 
-## habitat
+## Oikotype
+# mean temperature
 h_bm0 <- 0
+# mean variance in temperature (log scale)
 h_bv0 <- 0
 
 
 # random effects parameters
-## variances
+## individual variances
+### mean aggressiveness
 y_vm <- 0.3
+### slope aggressiveness vs temperature
 y_vs <- 0.1
+### variance in aggressiveness
 y_vv <- 0.2
+### mean temperature
 h_vm <- 0.3
+### variance in temperature
 h_vv <- 0.0001
 
+### vector of individual standard deviations
 sd_i <- diag(sqrt(c(y_vm, y_vs, y_vv, h_vm, h_vv)))
 
-## correlations
+## correlation matrix
 cor_m <- matrix(c(
   1, 0, -0.7, 0.7, 0,
   0, 1, 0, 0, 0,
@@ -60,9 +79,6 @@ cor_m <- matrix(c(
 
 ## variance matrix
 sigma <- sd_i %*% cor_m %*% sd_i
-
-
-
 
 ## individual values
 ind <- rmvnorm(n_ind, rep(0, ncol(sigma)), sigma)
@@ -92,4 +108,4 @@ dat <- dat %>%
   ) %>%
   select(id, sex, aggr, temp)
 
-write.csv(dat, "2_selkies_data.csv", row.names = FALSE)
+write.csv(dat, "2_selkie_data.csv", row.names = FALSE)
